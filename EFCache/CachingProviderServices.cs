@@ -67,17 +67,24 @@ namespace EFCache
             _providerServices.SetParameterValue(parameter, parameterType, value);
         }
 
+
+
+
         protected override DbSpatialDataReader GetDbSpatialDataReader(DbDataReader fromReader, string manifestToken)
         {
-            return _providerServices.GetSpatialDataReader(fromReader, manifestToken);
+            //CachingReader cr = (CachingReader)fromReader;
+            //return _providerServices.GetSpatialDataReader(cr, manifestToken);
+            if (fromReader.GetType() == typeof(CachingReader))
+            {
+                SqlSpatialDataReader sql = new SqlSpatialDataReader((CachingReader)fromReader);
+                return sql;
+            }
+            else
+            {
+                return _providerServices.GetSpatialDataReader(fromReader, manifestToken);
+            }
         }
 
-#pragma warning disable 618, 672
-        protected override DbSpatialServices DbGetSpatialServices(string manifestToken)
-        {
-            return _providerServices.GetSpatialServices(manifestToken);
-        }
-#pragma warning restore 618, 672
 
         public override object GetService(Type type, object key)
         {
